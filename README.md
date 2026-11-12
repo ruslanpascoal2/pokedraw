@@ -40,7 +40,7 @@ npm start
 
 ## Deploy
 
-- **Front-end**: GitHub Actions publica `client/` no GitHub Pages a cada push na `main`.
+- **Front-end**: GitHub Pages servindo a branch `gh-pages`, que é uma cópia da pasta `client/`. Para publicar mudanças: `git subtree push --prefix client origin gh-pages`.
 - **Back-end**: [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ruslanpascoal2/pokedraw) — usa o `render.yaml` (plano free).
 - O cliente no GitHub Pages aponta para o servidor configurado em `client/js/config.js` (`DEPLOYED_SERVER`). Para testar outro servidor sem mudar o código: `?server=https://seu-servidor`.
 
