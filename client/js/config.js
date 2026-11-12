@@ -3,7 +3,7 @@
 // - No GitHub Pages, usa DEPLOYED_SERVER.
 // - Dá para sobrescrever com ?server=https://meu-servidor (fica salvo no navegador).
 
-export const DEPLOYED_SERVER = 'https://pokedraw-server.onrender.com';
+export const DEPLOYED_SERVER = 'https://pokedraw-server-at8y.onrender.com';
 
 function resolveServer() {
   const params = new URLSearchParams(location.search);
