@@ -7,7 +7,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { Server } = require('socket.io');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3456;
 const CLIENT_DIR = path.join(__dirname, '..', 'client');
 
 const MAX_POKEMON = 151;

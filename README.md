@@ -35,7 +35,7 @@ O servidor também serve o `client/`, então a URL do Render sozinha já roda o 
 cd server
 npm install
 npm start
-# abra http://localhost:3000 (use duas abas para testar o multiplayer)
+# abra http://localhost:3456 (use duas abas para testar o multiplayer)
 ```
 
 ## Deploy
