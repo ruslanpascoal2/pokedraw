@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pokedraw-server
+    runtime: node
+    plan: free
+    buildCommand: cd server && npm install --omit=dev
+    startCommand: node server/index.js
+    healthCheckPath: /health
+    autoDeploy: true

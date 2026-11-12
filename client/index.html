@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PokéDraw — Quem é esse Pokémon?</title>
+    <meta name="description" content="Jogo multiplayer de desenho: veja a silhueta, desenhe o Pokémon e vote no melhor." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="toast" class="toast" hidden></div>
+    <div id="conn-banner" class="conn-banner" hidden></div>
+
+    <!-- INÍCIO -->
+    <section id="screen-home" class="screen">
+      <div class="home-card">
+        <h1 class="logo"><span class="logo-poke">Poké</span><span class="logo-draw">Draw</span></h1>
+        <p class="tagline">Quem é esse Pokémon? Desenhe antes que o tempo acabe!</p>
+
+        <label class="field">
+          <span>Seu nome de treinador</span>
+          <input id="home-name" maxlength="16" placeholder="Ash, Misty, Brock..." autocomplete="nickname" />
+        </label>
+
+        <div class="home-actions">
+          <button id="btn-create" class="btn btn-primary">Criar sala</button>
+          <div class="join-row">
+            <input id="home-code" maxlength="4" placeholder="CÓDIGO" autocomplete="off" />
+            <button id="btn-join" class="btn btn-secondary">Entrar</button>
+          </div>
+          <div class="divider"><span>ou</span></div>
+          <button id="btn-training" class="btn btn-ghost">🎯 Modo treino (sozinho)</button>
+        </div>
+
+        <details class="how">
+          <summary>Como jogar</summary>
+          <ol>
+            <li>Crie uma sala e mande o código (ou link) para os amigos.</li>
+            <li>A cada rodada aparece a silhueta de um Pokémon da 1ª geração.</li>
+            <li>Desenhe o Pokémon dentro do tempo.</li>
+            <li>Todos votam no melhor desenho — a votação é <b>cega</b>, ninguém sabe de quem é cada desenho.</li>
+            <li>O pódio mostra os vencedores da rodada e, no fim, o campeão geral.</li>
+          </ol>
+        </details>
+      </div>
+      <p class="footer-note">Fan game não oficial. Pokémon © Nintendo / Game Freak / The Pokémon Company. Imagens via PokeAPI.</p>
+    </section>
+
+    <!-- LOBBY -->
+    <section id="screen-lobby" class="screen" hidden>
+      <div class="panel lobby">
+        <div class="lobby-head">
+          <div>
+            <p class="muted">Código da sala</p>
+            <h2 id="lobby-code" class="room-code">----</h2>
+          </div>
+          <button id="btn-copy-link" class="btn btn-secondary">🔗 Copiar convite</button>
+        </div>
+
+        <div class="lobby-grid">
+          <div>
+            <h3>Treinadores <span id="lobby-count" class="pill"></span></h3>
+            <ul id="lobby-players" class="player-list"></ul>
+          </div>
+          <div>
+            <h3>Configurações</h3>
+            <label class="field">
+              <span>Rodadas</span>
+              <select id="set-rounds">
+                <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Tempo para desenhar</span>
+              <select id="set-time">
+                <option value="45">45 s</option><option value="60">1 min</option><option value="90" selected>1 min 30 s</option><option value="120">2 min</option><option value="180">3 min</option><option value="240">4 min</option><option value="300">5 min</option>
+              </select>
+            </label>
+            <p id="lobby-host-note" class="muted small"></p>
+          </div>
+        </div>
+
+        <div class="lobby-actions">
+          <button id="btn-leave" class="btn btn-ghost">Sair</button>
+          <button id="btn-start" class="btn btn-primary">Começar partida</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVELAÇÃO -->
+    <section id="screen-reveal" class="screen screen-reveal" hidden>
+      <div class="rays"></div>
+      <div class="reveal-content">
+        <p class="reveal-round" id="reveal-round"></p>
+        <h2 class="reveal-title">Quem é esse Pokémon?</h2>
+        <img id="reveal-img" class="silhouette reveal-silhouette" alt="Silhueta" />
+        <p class="reveal-sub">Prepare os pincéis... <b id="reveal-count">5</b></p>
+      </div>
+    </section>
+
+    <!-- DESENHO (multiplayer e treino) -->
+    <section id="screen-draw" class="screen screen-draw" hidden>
+      <header class="draw-top">
+        <div class="ref-card">
+          <div class="ref-img-wrap"><img id="draw-ref" class="silhouette" alt="Referência" /></div>
+          <div class="ref-info">
+            <p id="draw-label" class="muted small">Rodada 1/3</p>
+            <h3 id="draw-title">Quem é esse Pokémon?</h3>
+          </div>
+        </div>
+        <div id="draw-timer" class="timer"><span class="timer-num">--</span><div class="timer-bar"><i></i></div></div>
+        <div id="draw-actions" class="draw-actions"></div>
+      </header>
+      <div class="draw-main">
+        <aside id="toolbar" class="toolbar"></aside>
+        <div class="board-wrap">
+          <div id="board"></div>
+          <div id="board-overlay" class="board-overlay" hidden></div>
+        </div>
+        <aside id="draw-side" class="draw-side">
+          <h4>Treinadores</h4>
+          <ul id="draw-players" class="player-list compact"></ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VOTAÇÃO -->
+    <section id="screen-vote" class="screen" hidden>
+      <div class="panel wide">
+        <div class="vote-head">
+          <div class="ref-card small">
+            <div class="ref-img-wrap"><img id="vote-ref" class="silhouette" alt="" /></div>
+            <div class="ref-info">
+              <h2>Vote no melhor desenho!</h2>
+              <p class="muted">Votação cega — ninguém sabe de quem é cada desenho. Você não pode votar no seu.</p>
+            </div>
+          </div>
+          <div id="vote-timer" class="timer"><span class="timer-num">--</span><div class="timer-bar"><i></i></div></div>
+        </div>
+        <div id="vote-grid" class="vote-grid"></div>
+        <p id="vote-status" class="muted center"></p>
+      </div>
+    </section>
+
+    <!-- RESULTADO DA RODADA -->
+    <section id="screen-results" class="screen" hidden>
+      <div class="panel wide">
+        <div class="results-head">
+          <img id="results-art" class="results-art" alt="" />
+          <div>
+            <p class="muted" id="results-round"></p>
+            <h2 class="results-title">É o <span id="results-name">...</span>!</h2>
+          </div>
+        </div>
+        <div id="results-podium" class="podium"></div>
+        <div id="results-rest" class="rest-grid"></div>
+        <p id="results-next" class="muted center"></p>
+      </div>
+    </section>
+
+    <!-- PÓDIO FINAL -->
+    <section id="screen-final" class="screen" hidden>
+      <div class="panel wide">
+        <h2 class="center final-title">🏆 Pódio final 🏆</h2>
+        <div id="final-podium" class="podium final"></div>
+        <ol id="final-rest" class="final-rest"></ol>
+        <div class="lobby-actions center">
+          <button id="btn-final-lobby" class="btn btn-ghost">Voltar ao lobby</button>
+          <button id="btn-final-again" class="btn btn-primary">Jogar de novo</button>
+        </div>
+        <p id="final-note" class="muted center small"></p>
+      </div>
+    </section>
+
+    <canvas id="confetti" class="confetti"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.8.1/dist/socket.io.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
